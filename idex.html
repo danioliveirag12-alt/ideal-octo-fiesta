@@ -1,0 +1,911 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist — Visita Logística à Loja | Oba Hortifrúti</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        obaGreen: '#468234',
+                        obaGreenDark: '#356427',
+                        obaGreenLight: '#edf7eb',
+                        obaOrange: '#F37021',
+                        obaOrangeDark: '#d55d14',
+                        obaOrangeLight: '#fef3ec',
+                        obaDark: '#2C3E50',
+                        obaGrayBg: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            .print-shadow { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
+        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .logo-container:hover .logo-edit-btn { opacity: 1; }
+    </style>
+</head>
+<body class="bg-obaGrayBg text-slate-800 h-full flex flex-col antialiased">
+
+    <!-- Header / Brand Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <!-- Logomarca Oba Hortifrúti com Opção de Upload e Ajuste Fixo -->
+                <div class="relative logo-container flex items-center justify-center gap-3 bg-obaGreenLight px-4 py-2.5 rounded-xl border border-obaGreen/30 shadow-inner group w-36 h-14 overflow-hidden">
+                    <img id="headerLogoImg" src="" alt="Logo" class="max-h-10 max-w-full object-contain">
+                    
+                    <!-- Botão Flutuante para Subir/Editar Logo (Todos os Formatos) -->
+                    <button type="button" onclick="document.getElementById('logoFileInput').click()" class="logo-edit-btn opacity-0 group-hover:opacity-100 transition-opacity absolute -top-1 -right-1 bg-obaGreen text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] shadow-md hover:bg-obaGreenDark z-10" title="Alterar Logo (Qualquer formato de imagem)">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <input type="file" id="logoFileInput" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
+                </div>
+
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold text-slate-800 leading-tight">CHECKLIST — VISITA LOGÍSTICA À LOJA</h1>
+                    <p class="text-xs text-slate-500 font-medium">Escopo Exclusivo: Fluxo Físico, Recebimento, Estoque e Abastecimento Interno</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="switchTab('checklist')" id="tabBtnChecklist" class="px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-obaGreen text-white transition shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-list-check"></i> Checklist
+                </button>
+                <button onclick="switchTab('dashboard')" id="tabBtnDashboard" class="px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard KPIs
+                </button>
+                <button onclick="switchTab('history')" id="tabBtnHistory" class="px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Histórico & Salvos
+                </button>
+                <div class="h-6 w-px bg-slate-200 mx-1"></div>
+                <button onclick="saveFormToHistory()" class="px-3 py-2 text-xs sm:text-sm font-medium rounded-lg bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition flex items-center gap-1.5" title="Salvar formulário no histórico">
+                    <i class="fa-solid fa-floppy-disk"></i> Salvar Visita
+                </button>
+                <button onclick="window.print()" class="px-3 py-2 text-xs sm:text-sm font-medium rounded-lg bg-slate-800 text-white hover:bg-slate-900 transition flex items-center gap-1.5" title="Imprimir / Exportar PDF">
+                    <i class="fa-solid fa-file-pdf"></i> PDF
+                </button>
+                <button onclick="resetForm()" class="px-3 py-2 text-xs sm:text-sm font-medium rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition" title="Limpar formulário">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Notification Banner -->
+        <div id="statusMessage" class="hidden bg-obaGreenLight border border-obaGreen/30 text-obaGreenDark px-4 py-3 rounded-xl shadow-sm text-sm flex items-center justify-between no-print">
+            <span id="statusText"><i class="fa-solid fa-circle-check mr-2"></i> Operação realizada com sucesso!</span>
+            <button onclick="hideStatus()" class="text-obaGreenDark hover:opacity-70"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <!-- ================= TAB 1: CHECKLIST & FORMS ================= -->
+        <div id="tabContentChecklist" class="space-y-6">
+
+            <!-- SECTION 1: Identificação da Visita -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 print-shadow">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-obaGreen/10 text-obaGreen flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-store"></i>
+                        </div>
+                        <h2 class="text-lg font-bold text-slate-800">1. Identificação da Visita</h2>
+                    </div>
+                    <span class="text-xs font-semibold px-2.5 py-1 bg-obaOrangeLight text-obaOrange rounded-full border border-obaOrange/20">Obrigatório</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Loja</label>
+                        <input type="text" id="storeName" placeholder="Ex: Loja 12 - Campinas" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-obaGreen/40 text-sm font-medium bg-slate-50/50">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Data</label>
+                        <input type="date" id="visitDate" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-obaGreen/40 text-sm font-medium bg-slate-50/50">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Horário</label>
+                        <input type="time" id="visitTime" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-obaGreen/40 text-sm font-medium bg-slate-50/50">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Responsável pela Loja</label>
+                        <input type="text" id="storeManager" placeholder="Nome do Gerente" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-obaGreen/40 text-sm font-medium bg-slate-50/50">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Responsável pela Visita</label>
+                        <input type="text" id="visitorName" placeholder="Nome do Analista/Logística" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-obaGreen/40 text-sm font-medium bg-slate-50/50">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Último Inventário</label>
+                        <input type="date" id="lastInventoryDate" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-obaGreen/40 text-sm font-medium bg-slate-50/50">
+                    </div>
+                </div>
+            </section>
+
+            <!-- CHECKLIST SECTIONS CONTAINER -->
+            <div id="checklistContainer" class="space-y-6"></div>
+
+            <!-- SECTION 9: Plano de Ação Logístico -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 print-shadow">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 pb-4 mb-5 gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-obaOrange/10 text-obaOrange flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">9. Plano de Ação Logístico</h2>
+                            <p class="text-xs text-slate-500">Desvios identificados durante a visita que exigem tratativa corretiva</p>
+                        </div>
+                    </div>
+                    <button onclick="addActionRow()" class="px-4 py-2 bg-obaGreen text-white text-xs font-semibold rounded-xl hover:bg-obaGreenDark transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-plus"></i> Adicionar Ação
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-600 uppercase">
+                                <th class="p-3 w-16">No</th>
+                                <th class="p-3 w-1/4">Problema Identificado</th>
+                                <th class="p-3 w-36">Impacto</th>
+                                <th class="p-3 w-32">Prioridade</th>
+                                <th class="p-3 w-1/3">Ação Corretiva</th>
+                                <th class="p-3 w-36">Prazo</th>
+                                <th class="p-3 w-16 text-center no-print">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="actionPlanTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION 10: Resumo Executivo da Visita -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 print-shadow">
+                <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-5">
+                    <div class="w-8 h-8 rounded-lg bg-obaGreen/10 text-obaGreen flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-file-lines"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">10. Resumo Executivo da Visita</h2>
+                        <p class="text-xs text-slate-500">Síntese dos pontos fortes e principais gargalos operacionais observados</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-obaGreen uppercase mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check"></i> Pontos Positivos
+                        </label>
+                        <textarea id="positivePoints" rows="5" placeholder="Descreva os destaques positivos da operação logística nesta loja..." class="w-full p-3.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-obaGreen/40 text-sm bg-slate-50/50 resize-y"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-obaOrange uppercase mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Principais Desvios / Gargalos
+                        </label>
+                        <textarea id="bottlenecks" rows="5" placeholder="Descreva os principais pontos de atenção e gargalos logísticos encontrados..." class="w-full p-3.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-obaOrange/40 text-sm bg-slate-50/50 resize-y"></textarea>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- ================= TAB 2: DASHBOARD DINÂMICO DE KPIS ================= -->
+        <div id="tabContentDashboard" class="space-y-6 hidden">
+            <!-- KPI Cards Overview -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Conformidade Geral</span>
+                        <div class="w-8 h-8 rounded-xl bg-obaGreen/10 text-obaGreen flex items-center justify-center"><i class="fa-solid fa-circle-check"></i></div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="kpiGeneralScore" class="text-3xl font-extrabold text-slate-800">0%</span>
+                        <span id="kpiGeneralBadge" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">-</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2 mt-4 overflow-hidden">
+                        <div id="kpiGeneralBar" class="bg-obaGreen h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Itens Conformes (C)</span>
+                        <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-check"></i></div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="countC" class="text-3xl font-extrabold text-emerald-700">0</span>
+                        <span class="text-xs text-slate-400 font-medium">de <span id="countTotal">0</span> itens</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2 mt-4 overflow-hidden">
+                        <div id="kpiCBar" class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Não Conformes (NC)</span>
+                        <div class="w-8 h-8 rounded-xl bg-red-50 text-red-600 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="countNC" class="text-3xl font-extrabold text-red-700">0</span>
+                        <span class="text-xs text-slate-400 font-medium">requer plano de ação</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2 mt-4 overflow-hidden">
+                        <div id="kpiNCBar" class="bg-red-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Não Aplicáveis (N/A)</span>
+                        <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center"><i class="fa-solid fa-ban"></i></div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="countNA" class="text-3xl font-extrabold text-slate-700">0</span>
+                        <span class="text-xs text-slate-400 font-medium">isentos</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2 mt-4 overflow-hidden">
+                        <div id="kpiNABar" class="bg-slate-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Section Scores -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <h3 class="text-base font-bold text-slate-800 mb-1">Desempenho por Seção do Checklist</h3>
+                <p class="text-xs text-slate-500 mb-6">Percentual de conformidade avaliado em cada bloco logístico do PDF</p>
+                <div id="sectionScoresContainer" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: HISTÓRICO DE FORMULÁRIOS ================= -->
+        <div id="tabContentHistory" class="space-y-6 hidden">
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 pb-4 mb-5 gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-obaGreen/10 text-obaGreen flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">Histórico de Visitas Salvas</h2>
+                            <p class="text-xs text-slate-500">Gerencie e visualize formulários de visitas anteriores</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-600 uppercase">
+                                <th class="p-3.5">Data da Visita</th>
+                                <th class="p-3.5">Loja</th>
+                                <th class="p-3.5">Responsável</th>
+                                <th class="p-3.5 text-center">Conformidade Geral</th>
+                                <th class="p-3.5 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-medium">
+            <div class="flex items-center gap-2">
+                <span class="text-obaGreen font-bold">öba Hortifrúti</span>
+                <span>— Sistema de Gestão e Visitas Logísticas</span>
+            </div>
+            <div><span>Ambiente Seguro & Integrado</span></div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        const checklistData = [
+            {
+                id: 2,
+                title: "2. Recebimento de Mercadorias",
+                items: [
+                    { id: "r2_1", text: "Área de recebimento organizada" },
+                    { id: "r2_2", text: "Recebimento ocorre dentro do horário previsto" },
+                    { id: "r2_3", text: "Equipe disponível para receber a carga" },
+                    { id: "r2_4", text: "Documentação acompanha integralmente a carga" },
+                    { id: "r2_5", text: "Nota Fiscal (NF) conferida" },
+                    { id: "r2_6", text: "Romaneio conferido" },
+                    { id: "r2_7", text: "Quantidade de volumes conferida" },
+                    { id: "r2_8", text: "Paletes conferidos fisicamente" },
+                    { id: "r2_9", text: "Mercadoria chega sem avarias físicas" },
+                    { id: "r2_10", text: "Divergências são registradas formalmente" },
+                    { id: "r2_11", text: "Recebimento ocorre sem atrasos relevantes" }
+                ],
+                criticalQuestions: [
+                    { id: "cq_2_1", label: "Quais os principais problemas no recebimento? Há divergência recorrente em alguma rota/CD?" }
+                ]
+            },
+            {
+                id: 3,
+                title: "3. Identificação e Movimentação de Paletes",
+                items: [
+                    { id: "r3_1", text: "Paletes possuem identificação padrão" },
+                    { id: "r3_2", text: "Identificação é facilmente visualizada" },
+                    { id: "r3_3", text: "Loja consegue identificar a origem exata da carga" },
+                    { id: "r3_4", text: "Loja identifica a qual setor/categoria pertence" },
+                    { id: "r3_5", text: "Etiquetas estão legíveis" },
+                    { id: "r3_6", text: "Paletes estão íntegros (sem tábuas quebradas)" },
+                    { id: "r3_7", text: "Mercadorias estão corretamente acondicionadas" },
+                    { id: "r3_8", text: "Movimentação interna ocorre de forma adequada" }
+                ],
+                criticalQuestions: []
+            },
+            {
+                id: 4,
+                title: "4. Armazenagem / Depósito",
+                items: [
+                    { id: "r4_1", text: "Depósito organizado e limpo" },
+                    { id: "r4_2", text: "Produtos possuem local definido (endereçamento)" },
+                    { id: "r4_3", text: "Corredores estão livres de obstruções" },
+                    { id: "r4_4", text: "Produtos não estão armazenados diretamente no chão" },
+                    { id: "r4_5", text: "Produtos de alto giro possuem fácil acesso" },
+                    { id: "r4_6", text: "Produtos avariados e vencidos estão segregados" },
+                    { id: "r4_7", text: "Produtos próximos ao vencimento são identificados" },
+                    { id: "r4_8", text: "Não há excesso de mercadoria obstruindo o depósito" }
+                ],
+                criticalQuestions: []
+            },
+            {
+                id: 5,
+                title: "5. Estoque e Inventário",
+                items: [
+                    { id: "r5_1", text: "Estoque físico aparenta compatibilidade com o sistema" },
+                    { id: "r5_2", text: "Existem produtos sem cadastro ou identificação" },
+                    { id: "r5_3", text: "Transferências, entradas e saídas registradas corretamente" },
+                    { id: "r5_4", text: "Inventários realizados conforme procedimento padrão" },
+                    { id: "r5_5", text: "Divergências de inventário são tratadas" }
+                ],
+                criticalQuestions: []
+            },
+            {
+                id: 6,
+                title: "6. Abastecimento Interno (Depósito -> Área de Venda)",
+                items: [
+                    { id: "r6_1", text: "Produtos disponíveis no depósito são abastecidos" },
+                    { id: "r6_2", text: "Reposição interna ocorre em frequência adequada" },
+                    { id: "r6_3", text: "Produtos de alto giro recebem prioridade na reposição" }
+                ],
+                criticalQuestions: []
+            },
+            {
+                id: 7,
+                title: "7. Perdas, Avarias e Transporte",
+                items: [
+                    { id: "r7_1", text: "Avarias são registradas e classificadas por motivo" },
+                    { id: "r7_2", text: "Produtos vencidos/próximos possuem controle rigoroso" },
+                    { id: "r7_3", text: "Entregas ocorrem dentro da janela prevista" },
+                    { id: "r7_4", text: "Veículo adequado à operação e mercadoria sem avaria de transporte" },
+                    { id: "r7_5", text: "Comunicação Loja x CD (Chamados) é eficiente" }
+                ],
+                criticalQuestions: []
+            },
+            {
+                id: 8,
+                title: "8. Entrevistas com a Equipe Operacional",
+                items: [],
+                criticalQuestions: [
+                    { id: "cq_8_1", label: "Qual falha operacional acontece com maior frequência?" },
+                    { id: "cq_8_2", label: "O que poderia ser mudado na operação logística hoje?" }
+                ]
+            }
+        ];
+
+        let appState = {
+            id: null,
+            logoData: "",
+            metadata: { storeName: "", visitDate: new Date().toISOString().split('T')[0], visitTime: "", storeManager: "", visitorName: "", lastInventoryDate: "" },
+            answers: {},
+            criticalAnswers: {},
+            actionPlan: [{ id: 1, problem: "", impact: "Médio", priority: "Média", action: "", deadline: "" }],
+            summary: { positivePoints: "", bottlenecks: "" }
+        };
+
+        window.onload = function() {
+            renderChecklist();
+            renderActionPlan();
+            loadDraft();
+            updateDashboard();
+            renderHistoryTable();
+
+            document.getElementById('visitDate').value = appState.metadata.visitDate;
+            
+            ['storeName', 'visitDate', 'visitTime', 'storeManager', 'visitorName', 'lastInventoryDate', 'positivePoints', 'bottlenecks'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', (e) => {
+                        if (id in appState.metadata) appState.metadata[id] = e.target.value;
+                        if (id in appState.summary) appState.summary[id] = e.target.value;
+                        autoSaveDraft();
+                    });
+                }
+            });
+        };
+
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Image = e.target.result;
+                appState.logoData = base64Image;
+                document.getElementById('headerLogoImg').src = base64Image;
+                autoSaveDraft();
+                showStatus("Logomarca atualizada com sucesso!");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function switchTab(tab) {
+            const btnChecklist = document.getElementById('tabBtnChecklist');
+            const btnDashboard = document.getElementById('tabBtnDashboard');
+            const btnHistory = document.getElementById('tabBtnHistory');
+            const contentChecklist = document.getElementById('tabContentChecklist');
+            const contentDashboard = document.getElementById('tabContentDashboard');
+            const contentHistory = document.getElementById('tabContentHistory');
+
+            [btnChecklist, btnDashboard, btnHistory].forEach(b => {
+                b.className = "px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition flex items-center gap-2";
+            });
+            contentChecklist.classList.add('hidden');
+            contentDashboard.classList.add('hidden');
+            contentHistory.classList.add('hidden');
+
+            if (tab === 'checklist') {
+                btnChecklist.className = "px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-obaGreen text-white transition shadow-sm flex items-center gap-2";
+                contentChecklist.classList.remove('hidden');
+            } else if (tab === 'dashboard') {
+                btnDashboard.className = "px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-obaGreen text-white transition shadow-sm flex items-center gap-2";
+                contentDashboard.classList.remove('hidden');
+                updateDashboard();
+            } else if (tab === 'history') {
+                btnHistory.className = "px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-obaGreen text-white transition shadow-sm flex items-center gap-2";
+                contentHistory.classList.remove('hidden');
+                renderHistoryTable();
+            }
+        }
+
+        function renderChecklist() {
+            const container = document.getElementById('checklistContainer');
+            let html = '';
+
+            checklistData.forEach(section => {
+                html += `
+                    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 print-shadow">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+                            <h2 class="text-base sm:text-lg font-bold text-slate-800">${section.title}</h2>
+                            <span class="text-xs font-medium text-slate-400">${section.items.length > 0 ? section.items.length + ' itens' : 'Entrevistas'}</span>
+                        </div>
+                        <div class="space-y-3">
+                `;
+
+                section.items.forEach(item => {
+                    const ans = appState.answers[item.id] || { status: '', comment: '' };
+                    html += `
+                        <div class="p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                            <div class="flex-grow">
+                                <span class="text-sm font-medium text-slate-700">${item.text}</span>
+                            </div>
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                                <div class="flex items-center bg-white rounded-xl p-1 border border-slate-200 shadow-sm">
+                                    <button type="button" onclick="setStatus('${item.id}', 'C')" class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition ${ans.status === 'C' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}">C</button>
+                                    <button type="button" onclick="setStatus('${item.id}', 'NC')" class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition ${ans.status === 'NC' ? 'bg-red-500 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}">NC</button>
+                                    <button type="button" onclick="setStatus('${item.id}', 'NA')" class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition ${ans.status === 'NA' ? 'bg-slate-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}">N/A</button>
+                                </div>
+                                <div class="w-full sm:w-64">
+                                    <input type="text" placeholder="Observação opcional..." value="${ans.comment || ''}" oninput="setComment('${item.id}', this.value)" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-obaGreen/40 bg-white">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                if (section.criticalQuestions && section.criticalQuestions.length > 0) {
+                    html += `<div class="mt-5 pt-4 border-t border-slate-100 space-y-3">`;
+                    html += `<p class="text-xs font-bold text-obaOrange uppercase tracking-wide flex items-center gap-1.5"><i class="fa-solid fa-circle-question"></i> Perguntas Críticas</p>`;
+                    section.criticalQuestions.forEach(cq => {
+                        const cqAns = appState.criticalAnswers[cq.id] || '';
+                        html += `
+                            <div class="space-y-1">
+                                <label class="text-xs font-medium text-slate-600">${cq.label}</label>
+                                <input type="text" value="${cqAns}" oninput="setCriticalAnswer('${cq.id}', this.value)" placeholder="Digite a resposta da equipe..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-obaOrange/40 bg-white">
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+
+                html += `</div></section>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function setStatus(itemId, status) {
+            if (!appState.answers[itemId]) {
+                appState.answers[itemId] = { status: '', comment: '' };
+            }
+            if (appState.answers[itemId].status === status) {
+                appState.answers[itemId].status = '';
+            } else {
+                appState.answers[itemId].status = status;
+            }
+            renderChecklist();
+            autoSaveDraft();
+            updateDashboard();
+        }
+
+        function setComment(itemId, comment) {
+            if (!appState.answers[itemId]) {
+                appState.answers[itemId] = { status: '', comment: '' };
+            }
+            appState.answers[itemId].comment = comment;
+            autoSaveDraft();
+        }
+
+        function setCriticalAnswer(cqId, val) {
+            appState.criticalAnswers[cqId] = val;
+            autoSaveDraft();
+        }
+
+        function renderActionPlan() {
+            const tbody = document.getElementById('actionPlanTableBody');
+            let html = '';
+
+            if (appState.actionPlan.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400 text-sm">Nenhuma ação registrada. Clique em "Adicionar Ação".</td></tr>`;
+                return;
+            }
+
+            appState.actionPlan.forEach((row, index) => {
+                html += `
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-3 text-xs font-bold text-slate-500">${String(index + 1).padStart(2, '0')}</td>
+                        <td class="p-3"><input type="text" value="${row.problem}" oninput="updateActionRow(${index}, 'problem', this.value)" placeholder="Descreva o problema..." class="w-full p-2 rounded-lg border border-slate-200 text-xs bg-white"></td>
+                        <td class="p-3">
+                            <select onchange="updateActionRow(${index}, 'impact', this.value)" class="w-full p-2 rounded-lg border border-slate-200 text-xs bg-white">
+                                <option value="Baixo" ${row.impact === 'Baixo' ? 'selected' : ''}>Baixo</option>
+                                <option value="Médio" ${row.impact === 'Médio' ? 'selected' : ''}>Médio</option>
+                                <option value="Alto" ${row.impact === 'Alto' ? 'selected' : ''}>Alto</option>
+                                <option value="Crítico" ${row.impact === 'Crítico' ? 'selected' : ''}>Crítico</option>
+                            </select>
+                        </td>
+                        <td class="p-3">
+                            <select onchange="updateActionRow(${index}, 'priority', this.value)" class="w-full p-2 rounded-lg border border-slate-200 text-xs bg-white">
+                                <option value="Baixa" ${row.priority === 'Baixa' ? 'selected' : ''}>Baixa</option>
+                                <option value="Média" ${row.priority === 'Média' ? 'selected' : ''}>Média</option>
+                                <option value="Alta" ${row.priority === 'Alta' ? 'selected' : ''}>Alta</option>
+                                <option value="Urgente" ${row.priority === 'Urgente' ? 'selected' : ''}>Urgente</option>
+                            </select>
+                        </td>
+                        <td class="p-3"><input type="text" value="${row.action}" oninput="updateActionRow(${index}, 'action', this.value)" placeholder="Ação corretiva..." class="w-full p-2 rounded-lg border border-slate-200 text-xs bg-white"></td>
+                        <td class="p-3"><input type="date" value="${row.deadline}" oninput="updateActionRow(${index}, 'deadline', this.value)" class="w-full p-2 rounded-lg border border-slate-200 text-xs bg-white"></td>
+                        <td class="p-3 text-center no-print">
+                            <button onclick="removeActionRow(${index})" class="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition inline-flex items-center justify-center" title="Remover linha"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function addActionRow() {
+            appState.actionPlan.push({ id: Date.now(), problem: "", impact: "Médio", priority: "Média", action: "", deadline: "" });
+            renderActionPlan();
+            autoSaveDraft();
+        }
+
+        function removeActionRow(index) {
+            appState.actionPlan.splice(index, 1);
+            renderActionPlan();
+            autoSaveDraft();
+        }
+
+        function updateActionRow(index, field, value) {
+            appState.actionPlan[index][field] = value;
+            autoSaveDraft();
+        }
+
+        function updateDashboard() {
+            let totalItems = 0, countC = 0, countNC = 0, countNA = 0;
+            let sectionStats = {};
+
+            checklistData.forEach(sec => {
+                if(sec.items.length > 0) sectionStats[sec.id] = { title: sec.title, totalApplicable: 0, countC: 0 };
+            });
+
+            checklistData.forEach(section => {
+                section.items.forEach(item => {
+                    totalItems++;
+                    const ans = appState.answers[item.id];
+                    if (!ans || !ans.status) return;
+
+                    if (ans.status === 'C') {
+                        countC++;
+                        sectionStats[section.id].countC++;
+                        sectionStats[section.id].totalApplicable++;
+                    } else if (ans.status === 'NC') {
+                        countNC++;
+                        sectionStats[section.id].totalApplicable++;
+                    } else if (ans.status === 'NA') {
+                        countNA++;
+                    }
+                });
+            });
+
+            document.getElementById('countC').innerText = countC;
+            document.getElementById('countNC').innerText = countNC;
+            document.getElementById('countNA').innerText = countNA;
+            document.getElementById('countTotal').innerText = totalItems;
+
+            const evaluatedCount = countC + countNC;
+            const generalScore = evaluatedCount > 0 ? Math.round((countC / evaluatedCount) * 100) : 0;
+            
+            document.getElementById('kpiGeneralScore').innerText = `${generalScore}%`;
+            document.getElementById('kpiGeneralBar').style.width = `${generalScore}%`;
+            document.getElementById('kpiCBar').style.width = `${totalItems > 0 ? Math.round((countC/totalItems)*100) : 0}%`;
+            document.getElementById('kpiNCBar').style.width = `${totalItems > 0 ? Math.round((countNC/totalItems)*100) : 0}%`;
+            document.getElementById('kpiNABar').style.width = `${totalItems > 0 ? Math.round((countNA/totalItems)*100) : 0}%`;
+
+            const generalBadge = document.getElementById('kpiGeneralBadge');
+            if (generalScore >= 90) {
+                generalBadge.className = "text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800";
+                generalBadge.innerText = "Excelente";
+            } else if (generalScore >= 75) {
+                generalBadge.className = "text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800";
+                generalBadge.innerText = "Regular";
+            } else {
+                generalBadge.className = "text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-800";
+                generalBadge.innerText = "Crítico";
+            }
+
+            const secContainer = document.getElementById('sectionScoresContainer');
+            let secHtml = '';
+            Object.keys(sectionStats).forEach(secId => {
+                const s = sectionStats[secId];
+                const score = s.totalApplicable > 0 ? Math.round((s.countC / s.totalApplicable) * 100) : 0;
+                secHtml += `
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                            <span>${s.title}</span>
+                            <span>${score}% (${s.countC}/${s.totalApplicable} aplicáveis)</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                            <div class="bg-obaGreen h-2 rounded-full transition-all duration-500" style="width: ${score}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            secContainer.innerHTML = secHtml;
+        }
+
+        function autoSaveDraft() {
+            const dataToSave = getFormCurrentData();
+            localStorage.setItem('oba_logistic_visit_draft', JSON.stringify(dataToSave));
+        }
+
+        function getFormCurrentData() {
+            return {
+                id: appState.id || ('visit_' + Date.now()),
+                logoData: appState.logoData,
+                metadata: {
+                    storeName: document.getElementById('storeName').value,
+                    visitDate: document.getElementById('visitDate').value,
+                    visitTime: document.getElementById('visitTime').value,
+                    storeManager: document.getElementById('storeManager').value,
+                    visitorName: document.getElementById('visitorName').value,
+                    lastInventoryDate: document.getElementById('lastInventoryDate').value
+                },
+                answers: appState.answers,
+                criticalAnswers: appState.criticalAnswers,
+                actionPlan: appState.actionPlan,
+                summary: {
+                    positivePoints: document.getElementById('positivePoints').value,
+                    bottlenecks: document.getElementById('bottlenecks').value
+                },
+                savedAt: new Date().toISOString()
+            };
+        }
+
+        function loadDraft() {
+            const saved = localStorage.getItem('oba_logistic_visit_draft');
+            if (saved) {
+                try { loadFormData(JSON.parse(saved)); } catch (e) { console.error(e); }
+            }
+        }
+
+        function loadFormData(formData) {
+            appState.id = formData.id;
+            if (formData.logoData) {
+                appState.logoData = formData.logoData;
+                document.getElementById('headerLogoImg').src = formData.logoData;
+            } else {
+                appState.logoData = "";
+                document.getElementById('headerLogoImg').src = "";
+            }
+            if (formData.metadata) {
+                appState.metadata = formData.metadata;
+                document.getElementById('storeName').value = formData.metadata.storeName || '';
+                document.getElementById('visitDate').value = formData.metadata.visitDate || '';
+                document.getElementById('visitTime').value = formData.metadata.visitTime || '';
+                document.getElementById('storeManager').value = formData.metadata.storeManager || '';
+                document.getElementById('visitorName').value = formData.metadata.visitorName || '';
+                document.getElementById('lastInventoryDate').value = formData.metadata.lastInventoryDate || '';
+            }
+            if (formData.answers) appState.answers = formData.answers;
+            if (formData.criticalAnswers) appState.criticalAnswers = formData.criticalAnswers;
+            if (formData.actionPlan) appState.actionPlan = formData.actionPlan;
+            if (formData.summary) {
+                appState.summary = formData.summary;
+                document.getElementById('positivePoints').value = formData.summary.positivePoints || '';
+                document.getElementById('bottlenecks').value = formData.summary.bottlenecks || '';
+            }
+            renderChecklist();
+            renderActionPlan();
+            updateDashboard();
+        }
+
+        function saveFormToHistory() {
+            const currentForm = getFormCurrentData();
+            if (!currentForm.metadata.storeName) {
+                alert("Por favor, preencha ao menos o nome da Loja para salvar no histórico.");
+                document.getElementById('storeName').focus();
+                return;
+            }
+
+            let history = getStoredHistory();
+            const index = history.findIndex(item => item.id === currentForm.id);
+            if (index >= 0) history[index] = currentForm;
+            else history.unshift(currentForm);
+
+            localStorage.setItem('oba_logistic_history', JSON.stringify(history));
+            showStatus(`Visita da "${currentForm.metadata.storeName}" salva com sucesso no histórico!`);
+            renderHistoryTable();
+        }
+
+        function getStoredHistory() {
+            const stored = localStorage.getItem('oba_logistic_history');
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function renderHistoryTable() {
+            const tbody = document.getElementById('historyTableBody');
+            const history = getStoredHistory();
+
+            if (history.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 text-sm">Nenhuma visita salva encontrada.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            history.forEach(item => {
+                let totalC = 0, totalEvaluated = 0;
+                checklistData.forEach(sec => {
+                    sec.items.forEach(it => {
+                        const ans = item.answers && item.answers[it.id];
+                        if (ans && ans.status === 'C') { totalC++; totalEvaluated++; }
+                        else if (ans && ans.status === 'NC') { totalEvaluated++; }
+                    });
+                });
+                const score = totalEvaluated > 0 ? Math.round((totalC / totalEvaluated) * 100) : 0;
+                let badgeColor = "bg-emerald-100 text-emerald-800";
+                if (score < 75) badgeColor = "bg-red-100 text-red-800";
+                else if (score < 90) badgeColor = "bg-amber-100 text-amber-800";
+
+                const dateFormatted = item.metadata.visitDate ? item.metadata.visitDate.split('-').reverse().join('/') : '-';
+
+                html += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3.5 font-medium text-slate-700">${dateFormatted}</td>
+                        <td class="p-3.5 font-bold text-slate-800">${item.metadata.storeName || 'Loja sem nome'}</td>
+                        <td class="p-3.5 text-slate-600">${item.metadata.storeManager || item.metadata.visitorName || '-'}</td>
+                        <td class="p-3.5 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${badgeColor}">${score}%</span></td>
+                        <td class="p-3.5 text-center">
+                            <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                                <button onclick="viewHistoryKPIs('${item.id}')" class="px-2.5 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-semibold transition flex items-center gap-1"><i class="fa-solid fa-chart-pie"></i> KPIs</button>
+                                <button onclick="editHistoryForm('${item.id}')" class="px-2.5 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg text-xs font-semibold transition flex items-center gap-1"><i class="fa-solid fa-pen-to-square"></i> Editar</button>
+                                <button onclick="deleteHistoryItem('${item.id}')" class="px-2.5 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs transition"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function editHistoryForm(id) {
+            const history = getStoredHistory();
+            const found = history.find(item => item.id === id);
+            if (found) { loadFormData(found); switchTab('checklist'); showStatus(`Formulário da "${found.metadata.storeName}" carregado.`); }
+        }
+
+        function viewHistoryKPIs(id) {
+            const history = getStoredHistory();
+            const found = history.find(item => item.id === id);
+            if (found) { loadFormData(found); switchTab('dashboard'); showStatus(`Dashboard atualizado com os KPIs de: ${found.metadata.storeName}`); }
+        }
+
+        function deleteHistoryItem(id) {
+            if (confirm("Deseja excluir este formulário do histórico?")) {
+                let history = getStoredHistory();
+                history = history.filter(item => item.id !== id);
+                localStorage.setItem('oba_logistic_history', JSON.stringify(history));
+                renderHistoryTable();
+                showStatus("Formulário excluído com sucesso.");
+            }
+        }
+
+        function resetForm() {
+            if (confirm("Deseja limpar todos os dados atuais?")) {
+                localStorage.removeItem('oba_logistic_visit_draft');
+                appState = {
+                    id: null,
+                    logoData: "",
+                    metadata: { storeName: "", visitDate: new Date().toISOString().split('T')[0], visitTime: "", storeManager: "", visitorName: "", lastInventoryDate: "" },
+                    answers: {}, criticalAnswers: {},
+                    actionPlan: [{ id: 1, problem: "", impact: "Médio", priority: "Média", action: "", deadline: "" }],
+                    summary: { positivePoints: "", bottlenecks: "" }
+                };
+                document.getElementById('storeName').value = "";
+                document.getElementById('visitDate').value = appState.metadata.visitDate;
+                document.getElementById('visitTime').value = "";
+                document.getElementById('storeManager').value = "";
+                document.getElementById('visitorName').value = "";
+                document.getElementById('lastInventoryDate').value = "";
+                document.getElementById('positivePoints').value = "";
+                document.getElementById('bottlenecks').value = "";
+                document.getElementById('headerLogoImg').src = "";
+                renderChecklist();
+                renderActionPlan();
+                updateDashboard();
+                showStatus("Formulário reiniciado.");
+            }
+        }
+
+        function showStatus(msg) {
+            const statusEl = document.getElementById('statusMessage');
+            document.getElementById('statusText').innerHTML = `<i class="fa-solid fa-circle-check mr-2"></i> ${msg}`;
+            statusEl.classList.remove('hidden');
+            setTimeout(() => statusEl.classList.add('hidden'), 4000);
+        }
+
+        function hideStatus() { document.getElementById('statusMessage').classList.add('hidden'); }
+    </script>
+</body>
+</html>
